@@ -26,11 +26,6 @@ namespace NetCoreRateLimit
         private MemoryCacheRateLimitCounterStore memoryCacheRateLimitCounterStore;
         private RateLimitConfiguration rateLimitConfiguration;
 
-        //public delegate void RequestBlockedDelegate(ClientRequestIdentity identity, RateLimitCounter rateLimitCounter, RateLimitRule rateLimitRule);
-
-        //public delegate void RequestingDelegate(ClientRequestIdentity identity, Dictionary<RateLimitRule, RateLimitCounter> rules);
-        //public RequestBlockedDelegate RequestBlocked;
-        //public RequestingDelegate Requested;
         public event EventHandler<EventRequestBlockedArgs> RequestBlocked;
         public event EventHandler<EventRequestedArgs> Requested;
 
@@ -43,8 +38,12 @@ namespace NetCoreRateLimit
             _cache = new MemoryCache(new MemoryCacheOptions());
 
             memoryCacheIpPolicyStore = new MemoryCacheIpPolicyStore(_cache, _config.IpRateLimitOptions, _config.IpRateLimitPolicies);
+            //添加Policy进内存
+            memoryCacheIpPolicyStore.SeedAsync().Wait();
+
             memoryCacheClientPolicyStore = new MemoryCacheClientPolicyStore(_cache, _config.ClientRateLimitOptions, _config.ClientRateLimitPolicies);
-            memoryCacheRateLimitCounterStore = new MemoryCacheRateLimitCounterStore(_cache);
+            //添加Policy进内存
+            memoryCacheClientPolicyStore.SeedAsync().Wait();
 
             rateLimitConfiguration = new RateLimitConfiguration(_config.IpRateLimitOptions, _config.ClientRateLimitOptions);
 

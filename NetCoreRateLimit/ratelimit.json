@@ -1,5 +1,5 @@
 {
-  "WriteRequestedLog": false,
+  "WriteRequestedLog": true,
   "WriteRequestBlockedLog": true,
   "IpRateLimiting": {
     "EnableEndpointRateLimiting": true,

@@ -8,6 +8,7 @@ using Bumblebee.Events;
 using Bumblebee;
 using System.Reflection;
 using NetCoreRateLimit.Models;
+using Serilog.Events;
 
 namespace NetCoreRateLimit.Plugin
 {
@@ -34,15 +35,20 @@ namespace NetCoreRateLimit.Plugin
         {
             _config = ConfigHelper.GetConfig();
             log = new LoggerConfiguration()
-                         .WriteTo.Async(a => a.File(new CompactJsonFormatter(), "./logs/ratelimit_ip_.clef", rollingInterval: RollingInterval.Day,
-                         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information),
-                         bufferSize: 100)
-                         .CreateLogger();
+                //Error
+                .WriteTo.Conditional(a => a.Level == LogEventLevel.Error, a => a.Async(a => a.File(new CompactJsonFormatter(), "./logs/error_ratelimit_ip_.clef", rollingInterval: RollingInterval.Day,
+                    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information),
+                    bufferSize: 100))
+                //Other
+                .WriteTo.Conditional(a => (a.Level <= LogEventLevel.Warning), a => a.Async(a => a.File(new CompactJsonFormatter(), "./logs/log_ratelimit_ip_.clef", rollingInterval: RollingInterval.Day,
+                    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information),
+                    bufferSize: 100))
+                .CreateLogger();
             g = gateway;
             netCoreRateLimit = new NetCoreRateLimit(RateLimitType.IP);
             netCoreRateLimit.RequestBlocked += NetCoreRateLimit_RequestBlocked;
             netCoreRateLimit.Requested += NetCoreRateLimit_Requested;
-          
+
         }
 
         private void NetCoreRateLimit_Requested(object sender, EventRequestedArgs e)
@@ -58,7 +64,7 @@ namespace NetCoreRateLimit.Plugin
         {
             if (_config.WriteRequestBlockedLog)
             {
-                log.Warning("RequestBlocked ClientId {@ClientId} ClientIp {@ClientIp}, {@RequestBlockedArgs}",
+                log.Error("RequestBlocked ClientId {@ClientId} ClientIp {@ClientIp}, {@RequestBlockedArgs}", 
                     e.identity.ClientId,
                     e.identity.ClientIp,
                     e);

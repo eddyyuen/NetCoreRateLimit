@@ -37,6 +37,8 @@ namespace NetCoreRateLimit
 
             _cache = new MemoryCache(new MemoryCacheOptions());
 
+            memoryCacheRateLimitCounterStore = new MemoryCacheRateLimitCounterStore(_cache);
+
             memoryCacheIpPolicyStore = new MemoryCacheIpPolicyStore(_cache, _config.IpRateLimitOptions, _config.IpRateLimitPolicies);
             //添加Policy进内存
             memoryCacheIpPolicyStore.SeedAsync().Wait();
@@ -46,6 +48,8 @@ namespace NetCoreRateLimit
             memoryCacheClientPolicyStore.SeedAsync().Wait();
 
             rateLimitConfiguration = new RateLimitConfiguration(_config.IpRateLimitOptions, _config.ClientRateLimitOptions);
+
+
 
             switch (rateLimitType)
             {
@@ -132,7 +136,7 @@ namespace NetCoreRateLimit
                             RequestBlocked.Invoke(this, new EventRequestBlockedArgs() { identity = identity, rateLimitCounter = rateLimitCounter, rateLimitRule = rule });
                         }
                         //// break execution
-                        await ReturnQuotaExceededResponse(e, rule, retryAfter);
+                        ReturnQuotaExceededResponse(e, rule, retryAfter).Wait();
 
 
                         return;

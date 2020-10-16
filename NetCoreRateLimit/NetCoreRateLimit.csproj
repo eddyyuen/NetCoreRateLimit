@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Description>为 BeetleX.Bumblebee 开发,改写自 AspNetCoreRateLimit 的限流插件</Description>
     <Authors>Eddyyuen</Authors>
     <Company />
@@ -12,7 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BeetleX.Bumblebee" Version="1.2.0.3" />
+    <PackageReference Include="BeetleX.Bumblebee" Version="1.4.2.2" />
+    <PackageReference Include="BeetleX.FastHttpApi" Version="1.8.8.4" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.1.8" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.8" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.8" />

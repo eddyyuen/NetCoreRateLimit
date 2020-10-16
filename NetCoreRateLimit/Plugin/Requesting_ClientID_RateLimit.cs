@@ -8,6 +8,7 @@ using Bumblebee.Events;
 using Bumblebee;
 using System.Reflection;
 using NetCoreRateLimit.Models;
+using Serilog.Events;
 
 namespace NetCoreRateLimit.Plugin
 {
@@ -34,9 +35,16 @@ namespace NetCoreRateLimit.Plugin
         {
             _config = ConfigHelper.GetConfig();
             log = new LoggerConfiguration()
-                         .WriteTo.Async(a => a.File(new CompactJsonFormatter(), "./logs/ratelimit_clientid_.clef", rollingInterval: RollingInterval.Day,
-                         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information),
-                         bufferSize: 100)
+                //Error
+                .WriteTo.Conditional(a => a.Level == LogEventLevel.Error, a => a.Async(a => a.File(new CompactJsonFormatter(),
+                    "./logs/error_ratelimit_clientid__.clef", rollingInterval: RollingInterval.Day,
+                    restrictedToMinimumLevel: LogEventLevel.Information),
+                    bufferSize: 100))
+                //Other
+                .WriteTo.Conditional(a => (a.Level <= LogEventLevel.Warning), a => a.Async(a => a.File(new CompactJsonFormatter(), 
+                    "./logs/log_ratelimit_clientid__.clef", rollingInterval: RollingInterval.Day,
+                    restrictedToMinimumLevel: LogEventLevel.Information),
+                    bufferSize: 100))
                          .CreateLogger();
             g = gateway;
             netCoreRateLimit = new NetCoreRateLimit(RateLimitType.CLIENT_ID);
